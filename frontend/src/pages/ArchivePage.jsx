@@ -5,7 +5,7 @@ import ProgressRing from '../components/ProgressRing'
 import FileTree from '../components/FileTree'
 import FileCard from '../components/FileCard'
 
-const API_BASE = '/api/archive'
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/archive'
 
 function ArchivePage() {
     const [mode, setMode] = useState('zip') // 'zip' | 'unzip' | 'peek'

@@ -4,7 +4,7 @@ import ConfigBar from '../components/ConfigBar'
 import ProgressRing from '../components/ProgressRing'
 import FileCard from '../components/FileCard'
 
-const API_BASE = '/api/image'
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/image'
 
 function ImagePage() {
     const [files, setFiles] = useState([])
