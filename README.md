@@ -4,7 +4,7 @@
 
 > Zero-clutter file utilities — in-stream image processing, encrypted archiving, and real-time progress tracking. Built with Spring Boot and React.
 
-![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java-21+-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2-6DB33F?style=flat-square&logo=springboot&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
@@ -31,25 +31,30 @@
 - **XHR Upload Listeners** — Frame-by-frame upload progress via `XMLHttpRequest`
 - **Janitor Service** — `@Scheduled` cron job purges expired temp directories every 30 minutes
 
+### 🎨 UI & Design
+- **Fluid Dark Mode** — Seamless local-first dark mode featuring liquid transition animations
+- **Glassmorphic Elements** — Premium, frosted glass interface design
+- **Drag & Drop** — Intuitive interaction model for bulk uploading files
+
 ---
 
 ## 🏗️ Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Java 17+, Spring Boot 3.2, Spring WebFlux |
+| **Backend** | Java 21+, Spring Boot 3.2, Spring WebFlux |
 | **Archive** | Zip4j (AES-256), `java.util.zip` |
 | **Image** | Thumbnailator, metadata-extractor |
 | **Frontend** | React 19, Vite 7, Tailwind CSS 3 |
 | **Progress** | Server-Sent Events (SSE), XHR Upload Listeners |
-| **Design** | Glassmorphic UI, Inter & JetBrains Mono fonts |
+| **Design** | Fluid Dark Mode, Glassmorphic UI, Inter & JetBrains Mono fonts |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Java 17+** (tested on Java 23)
+- **Java 21+**
 - **Node.js 18+** and npm
 
 ### Backend
