@@ -17,14 +17,67 @@ function DropZone({ onFilesSelected, accept, multiple = true, label }) {
         setIsDragOver(false)
     }, [])
 
-    const handleDrop = useCallback((e) => {
+    const handleDrop = useCallback(async (e) => {
         e.preventDefault()
         e.stopPropagation()
         setIsDragOver(false)
 
-        const droppedFiles = Array.from(e.dataTransfer.files)
-        setFiles(droppedFiles)
-        onFilesSelected?.(droppedFiles)
+        const items = Array.from(e.dataTransfer.items)
+        const allFiles = []
+
+        const traverseFileTree = async (item, path = '') => {
+            if (item.isFile) {
+                return new Promise((resolve) => {
+                    item.file(file => {
+                        if (path && !file.webkitRelativePath) {
+                            try {
+                                Object.defineProperty(file, 'webkitRelativePath', {
+                                    value: path + file.name,
+                                    writable: false
+                                });
+                            } catch (e) {
+                                file.customPath = path + file.name;
+                            }
+                        } else if (!path && !file.webkitRelativePath) {
+                            file.customPath = file.name;
+                        }
+                        allFiles.push(file)
+                        resolve()
+                    })
+                })
+            } else if (item.isDirectory) {
+                const dirReader = item.createReader()
+                return new Promise((resolve) => {
+                    const readEntries = () => {
+                        dirReader.readEntries(async (entries) => {
+                            if (entries.length === 0) {
+                                resolve()
+                            } else {
+                                for (const entry of entries) {
+                                    await traverseFileTree(entry, path + item.name + '/')
+                                }
+                                readEntries()
+                            }
+                        })
+                    }
+                    readEntries()
+                })
+            }
+        }
+
+        for (const item of items) {
+            if (item.webkitGetAsEntry) {
+                const entry = item.webkitGetAsEntry();
+                if (entry) {
+                    await traverseFileTree(entry);
+                }
+            } else if (item.kind === 'file') {
+                allFiles.push(item.getAsFile())
+            }
+        }
+
+        setFiles(allFiles)
+        onFilesSelected?.(allFiles)
     }, [onFilesSelected])
 
     const handleInputChange = useCallback((e) => {

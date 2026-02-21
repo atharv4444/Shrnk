@@ -60,6 +60,34 @@ function ConfigBar({ config, onChange, mode }) {
                 )}
             </div>
 
+            {/* Compression Level (Archive mode only) */}
+            {mode === 'archive' && (
+                <div>
+                    <label className="block text-xs font-semibold text-fluid-text mb-2">
+                        Compression Level
+                    </label>
+                    <div className="flex gap-2 flex-wrap mb-4">
+                        {[
+                            { value: 'STORE', label: 'Store (Fastest)' },
+                            { value: 'NORMAL', label: 'Normal' },
+                            { value: 'MAXIMUM', label: 'Maximum' },
+                            { value: 'ULTRA', label: 'Ultra (Slowest)' },
+                        ].map(opt => (
+                            <button
+                                key={opt.value}
+                                onClick={() => handleChange('compressionLevel', opt.value)}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${config.compressionLevel === opt.value
+                                    ? 'bg-fluid-accent text-white shadow-md shadow-brand-200'
+                                    : 'bg-fluid-card text-fluid-text hover:brightness-95 border border-fluid-border'
+                                    }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Password (Archive mode only) */}
             {mode === 'archive' && (
                 <div>

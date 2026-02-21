@@ -44,8 +44,8 @@ public class ArchiveService {
     /**
      * Create a ZIP archive from uploaded files
      */
-    public File createZip(String sessionId, MultipartFile[] files, String password,
-            String resizeOption, boolean stripMetadata) throws IOException {
+    public File createZip(String sessionId, MultipartFile[] files, List<String> paths, String password,
+            String resizeOption, boolean stripMetadata, String compressionLevelStr) throws IOException {
         Path sessionDir = createSessionDir(sessionId);
         Path inputDir = sessionDir.resolve("input");
         Path outputDir = sessionDir.resolve("output");
@@ -91,7 +91,21 @@ public class ArchiveService {
 
         ZipParameters params = new ZipParameters();
         params.setCompressionMethod(CompressionMethod.DEFLATE);
-        params.setCompressionLevel(CompressionLevel.NORMAL);
+
+        CompressionLevel level = CompressionLevel.NORMAL;
+        if ("MAXIMUM".equalsIgnoreCase(compressionLevelStr))
+            level = CompressionLevel.MAXIMUM;
+        else if ("ULTRA".equalsIgnoreCase(compressionLevelStr))
+            level = CompressionLevel.ULTRA;
+        else if ("FAST".equalsIgnoreCase(compressionLevelStr))
+            level = CompressionLevel.FAST;
+        else if ("FASTER".equalsIgnoreCase(compressionLevelStr))
+            level = CompressionLevel.FASTER;
+        else if ("STORE".equalsIgnoreCase(compressionLevelStr)) {
+            params.setCompressionMethod(CompressionMethod.STORE);
+            level = CompressionLevel.NO_COMPRESSION;
+        }
+        params.setCompressionLevel(level);
 
         if (password != null && !password.isEmpty()) {
             params.setEncryptFiles(true);
@@ -102,6 +116,14 @@ public class ArchiveService {
         long processedBytes = 0;
         for (int i = 0; i < filesToZip.size(); i++) {
             File f = filesToZip.get(i);
+
+            // Reconstruct folder paths inside the zip if provided
+            if (paths != null && i < paths.size() && paths.get(i) != null && !paths.get(i).isEmpty()) {
+                params.setFileNameInZip(paths.get(i));
+            } else {
+                params.setFileNameInZip(f.getName());
+            }
+
             zip.addFile(f, params);
             processedBytes += f.length();
             progressService.sendProgress(sessionId, processedBytes, totalBytes,
@@ -151,8 +173,11 @@ public class ArchiveService {
     /**
      * Peek inside a ZIP — return file tree without extracting
      */
-    public List<FileEntry> peekZip(MultipartFile zipMultipart, String password) throws IOException {
-        Path tempFile = Files.createTempFile("shrnk-peek-", ".zip");
+    public List<FileEntry> peekZip(String sessionId, MultipartFile zipMultipart, String password) throws IOException {
+        Path sessionDir = createSessionDir(sessionId);
+        Path tempFile = sessionDir.resolve("peek_archive.zip");
+        Files.createDirectories(sessionDir);
+
         try (InputStream is = zipMultipart.getInputStream();
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(tempFile.toFile()), BUFFER_SIZE)) {
             byte[] buffer = new byte[BUFFER_SIZE];
@@ -175,22 +200,23 @@ public class ArchiveService {
                     header.isDirectory()));
         }
 
-        Files.deleteIfExists(tempFile);
+        try {
+            zip.close();
+        } catch (Exception ignored) {
+        }
         return entries;
     }
 
     /**
      * Extract selected files from a ZIP by their paths
      */
-    public File extractSelected(String sessionId, MultipartFile zipMultipart,
+    public List<File> extractSelected(String sessionId, MultipartFile zipMultipart,
             List<String> selectedPaths, String password) throws IOException {
         Path sessionDir = createSessionDir(sessionId);
         Path inputDir = sessionDir.resolve("input");
         Path outputDir = sessionDir.resolve("output");
-        Path selectedDir = sessionDir.resolve("selected");
         Files.createDirectories(inputDir);
         Files.createDirectories(outputDir);
-        Files.createDirectories(selectedDir);
 
         // Save uploaded zip
         File zipInput = inputDir.resolve(zipMultipart.getOriginalFilename()).toFile();
@@ -208,27 +234,21 @@ public class ArchiveService {
                 : new ZipFile(zipInput);
 
         for (String path : selectedPaths) {
-            zip.extractFile(path, selectedDir.toString());
+            zip.extractFile(path, outputDir.toString());
         }
 
-        // Re-zip selected files
-        File resultZip = outputDir.resolve("selected.zip").toFile();
-        ZipFile resultZipFile = new ZipFile(resultZip);
-        ZipParameters params = new ZipParameters();
-        params.setCompressionMethod(CompressionMethod.DEFLATE);
+        try {
+            zip.close();
+        } catch (Exception ignored) {
+        }
 
-        try (var stream = Files.walk(selectedDir)) {
-            stream.filter(Files::isRegularFile).forEach(p -> {
-                try {
-                    resultZipFile.addFile(p.toFile(), params);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        List<File> extracted = new ArrayList<>();
+        try (var stream = Files.walk(outputDir)) {
+            stream.filter(Files::isRegularFile).forEach(p -> extracted.add(p.toFile()));
         }
 
         progressService.sendComplete(sessionId);
-        return resultZip;
+        return extracted;
     }
 
     /**

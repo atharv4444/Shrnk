@@ -4,6 +4,7 @@ import ConfigBar from '../components/ConfigBar'
 import ProgressRing from '../components/ProgressRing'
 import FileTree from '../components/FileTree'
 import FileCard from '../components/FileCard'
+import PreviewModal from '../components/PreviewModal'
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/archive'
 
@@ -23,6 +24,7 @@ function ArchivePage() {
     const [peekEntries, setPeekEntries] = useState(null)
     const [selectedPaths, setSelectedPaths] = useState([])
     const [error, setError] = useState(null)
+    const [previewFile, setPreviewFile] = useState(null)
 
     const getResizeValue = () => {
         if (config.resizeOption === 'custom' && config.customWidth && config.customHeight) {
@@ -39,11 +41,15 @@ function ArchivePage() {
         setProgress({ percent: 0, status: 'Uploading', eta: '', label: '' })
 
         const formData = new FormData()
-        files.forEach(f => formData.append('files', f))
+        files.forEach(f => {
+            formData.append('files', f)
+            formData.append('paths', f.webkitRelativePath || f.customPath || '')
+        })
         if (config.password) formData.append('password', config.password)
         const resize = getResizeValue()
         if (resize) formData.append('resizeOption', resize)
         formData.append('stripMetadata', config.stripMetadata)
+        if (config.compressionLevel) formData.append('compressionLevel', config.compressionLevel)
 
         try {
             const xhr = new XMLHttpRequest()
@@ -155,8 +161,9 @@ function ArchivePage() {
         try {
             const res = await fetch(`${API_BASE}/peek`, { method: 'POST', body: formData })
             if (!res.ok) throw new Error('Failed to peek into archive')
-            const entries = await res.json()
-            setPeekEntries(entries)
+            const response = await res.json()
+            setPeekEntries(response.entries)
+            setResult({ sessionId: response.sessionId }) // For preview fetching
         } catch (e) {
             setError(e.message)
         } finally {
@@ -187,9 +194,13 @@ function ArchivePage() {
         }
     }
 
-    const handleDownload = () => {
+    const handleDownload = (path = null) => {
         if (!result?.sessionId) return
-        window.open(`${API_BASE}/download/${result.sessionId}`, '_blank')
+        let url = `${API_BASE}/download/${result.sessionId}`
+        if (path) {
+            url += `?path=${encodeURIComponent(path)}`
+        }
+        window.open(url, '_blank')
     }
 
     const resetAll = () => {
@@ -272,7 +283,11 @@ function ArchivePage() {
                             <h3 className="text-sm font-bold text-fluid-text uppercase tracking-wider mb-4">
                                 📋 Archive Contents
                             </h3>
-                            <FileTree entries={peekEntries} onSelectionChange={setSelectedPaths} />
+                            <FileTree
+                                entries={peekEntries}
+                                onSelectionChange={setSelectedPaths}
+                                onPreview={(path, name) => setPreviewFile({ path, name })}
+                            />
                             {selectedPaths.length > 0 && (
                                 <div className="mt-4 flex gap-3">
                                     <button onClick={handleExtractSelected} className="btn-primary text-sm">
@@ -295,15 +310,20 @@ function ArchivePage() {
                                         {result.size && ` • ${(result.size / 1024 / 1024).toFixed(2)} MB`}
                                     </p>
                                 </div>
-                                <button onClick={handleDownload} className="btn-primary">
+                                <button onClick={() => handleDownload()} className="btn-primary">
                                     Download
                                 </button>
                             </div>
 
-                            {result.files && (
+                            {result.files && result.files.length > 0 && (
                                 <div className="mt-4 space-y-2 max-h-48 overflow-y-auto">
                                     {result.files.map((f, i) => (
-                                        <FileCard key={i} name={f.name} size={f.size} />
+                                        <FileCard
+                                            key={i}
+                                            name={f.name}
+                                            size={f.size}
+                                            onDownload={() => handleDownload(f.path)}
+                                        />
                                     ))}
                                 </div>
                             )}
@@ -331,6 +351,12 @@ function ArchivePage() {
                     )}
                 </div>
             </div>
+            <PreviewModal
+                isOpen={!!previewFile}
+                onClose={() => setPreviewFile(null)}
+                fileUrl={previewFile && result?.sessionId ? `${API_BASE}/preview/${result.sessionId}?path=${encodeURIComponent(previewFile.path)}` : ''}
+                fileName={previewFile ? previewFile.name : ''}
+            />
         </div>
     )
 }

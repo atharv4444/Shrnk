@@ -119,9 +119,13 @@ function ImagePage() {
         }
     }
 
-    const handleDownload = () => {
+    const handleDownload = (path = null) => {
         if (!result?.sessionId) return
-        window.open(`${API_BASE}/download/${result.sessionId}`, '_blank')
+        let url = `${API_BASE}/download/${result.sessionId}`
+        if (path) {
+            url += `?path=${encodeURIComponent(path)}`
+        }
+        window.open(url, '_blank')
     }
 
     const resetAll = () => {
@@ -216,18 +220,24 @@ function ImagePage() {
                                     <h3 className="text-lg font-bold text-fluid-text">✅ Images Processed!</h3>
                                     <p className="text-sm text-fluid-muted mt-1">
                                         {result.totalFiles} files processed
-                                        {result.size && ` • Output: ${(result.size / 1024 / 1024).toFixed(2)} MB`}
                                     </p>
                                 </div>
-                                <button onClick={handleDownload} className="btn-primary">
-                                    Download ZIP
-                                </button>
+                                {result.totalFiles === 1 && (
+                                    <button onClick={() => handleDownload()} className="btn-primary">
+                                        Download
+                                    </button>
+                                )}
                             </div>
 
-                            {result.files && (
+                            {result.files && result.files.length > 0 && (
                                 <div className="mt-4 space-y-2 max-h-48 overflow-y-auto">
                                     {result.files.map((f, i) => (
-                                        <FileCard key={i} name={f.name} size={f.size} />
+                                        <FileCard
+                                            key={i}
+                                            name={f.name}
+                                            size={f.size}
+                                            onDownload={() => handleDownload(f.path)}
+                                        />
                                     ))}
                                 </div>
                             )}
@@ -267,7 +277,7 @@ function ImagePage() {
                         <p className="font-semibold text-fluid-text text-sm">How it works</p>
                         <p>Images are processed using Java parallel streams for maximum throughput.</p>
                         <p>EXIF stripping removes GPS coordinates, camera model, and other private data.</p>
-                        <p>Results are packaged as a ZIP for easy download.</p>
+                        <p>Results are ready for immediate download.</p>
                     </div>
                 </div>
             </div>

@@ -49,10 +49,8 @@ public class ImageController {
             Path sessionDir = Paths.get(tempDir, sessionId);
             Path inputDir = sessionDir.resolve("input");
             Path outputDir = sessionDir.resolve("output");
-            Path processedDir = sessionDir.resolve("processed");
             Files.createDirectories(inputDir);
             Files.createDirectories(outputDir);
-            Files.createDirectories(processedDir);
 
             // Save uploaded files
             List<File> savedFiles = new ArrayList<>();
@@ -71,36 +69,21 @@ public class ImageController {
                 savedFiles.add(saved);
             }
 
-            // Process images in parallel
-            final long total = totalBytes;
-            List<File> processed = imageService.processBatch(savedFiles, resizeOption, processedDir, stripMetadata);
-
-            // Zip the results
-            File resultZip = outputDir.resolve("resized_images.zip").toFile();
-            ZipFile zip = new ZipFile(resultZip);
-            ZipParameters params = new ZipParameters();
-            params.setCompressionMethod(CompressionMethod.DEFLATE);
-
-            long processedBytes = 0;
-            for (File f : processed) {
-                zip.addFile(f, params);
-                processedBytes += f.length();
-                progressService.sendProgress(sessionId, processedBytes, total, "Packaging", f.getName());
-            }
+            // Process images directly to outputDir
+            List<File> processed = imageService.processBatch(savedFiles, resizeOption, outputDir, stripMetadata);
 
             progressService.sendComplete(sessionId);
 
             response.put("sessionId", sessionId);
             response.put("status", "complete");
             response.put("totalFiles", processed.size());
-            response.put("fileName", resultZip.getName());
-            response.put("size", resultZip.length());
 
             List<Map<String, Object>> fileDetails = new ArrayList<>();
             for (File f : processed) {
                 Map<String, Object> detail = new HashMap<>();
                 detail.put("name", f.getName());
                 detail.put("size", f.length());
+                detail.put("path", f.getName());
                 fileDetails.add(detail);
             }
             response.put("files", fileDetails);
@@ -126,10 +109,8 @@ public class ImageController {
             Path sessionDir = Paths.get(tempDir, sessionId);
             Path inputDir = sessionDir.resolve("input");
             Path outputDir = sessionDir.resolve("output");
-            Path processedDir = sessionDir.resolve("processed");
             Files.createDirectories(inputDir);
             Files.createDirectories(outputDir);
-            Files.createDirectories(processedDir);
 
             List<File> savedFiles = new ArrayList<>();
             for (MultipartFile mf : files) {
@@ -145,23 +126,23 @@ public class ImageController {
                 savedFiles.add(saved);
             }
 
-            List<File> processed = imageService.processBatch(savedFiles, null, processedDir, true);
-
-            // Zip results
-            File resultZip = outputDir.resolve("stripped_images.zip").toFile();
-            ZipFile zip = new ZipFile(resultZip);
-            ZipParameters params = new ZipParameters();
-            params.setCompressionMethod(CompressionMethod.DEFLATE);
-            for (File f : processed) {
-                zip.addFile(f, params);
-            }
+            List<File> processed = imageService.processBatch(savedFiles, null, outputDir, true);
 
             progressService.sendComplete(sessionId);
 
             response.put("sessionId", sessionId);
             response.put("status", "complete");
             response.put("totalFiles", processed.size());
-            response.put("size", resultZip.length());
+
+            List<Map<String, Object>> fileDetails = new ArrayList<>();
+            for (File f : processed) {
+                Map<String, Object> detail = new HashMap<>();
+                detail.put("name", f.getName());
+                detail.put("size", f.length());
+                detail.put("path", f.getName());
+                fileDetails.add(detail);
+            }
+            response.put("files", fileDetails);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("error", e.getMessage());
@@ -173,23 +154,34 @@ public class ImageController {
      * Download processed images
      */
     @GetMapping("/download/{sessionId}")
-    public ResponseEntity<Resource> download(@PathVariable String sessionId) {
+    public ResponseEntity<Resource> download(
+            @PathVariable String sessionId,
+            @RequestParam(value = "path", required = false) String pathParam) {
         try {
             Path outputDir = Paths.get(tempDir, sessionId, "output");
             if (!Files.exists(outputDir)) {
                 return ResponseEntity.notFound().build();
             }
 
-            Optional<Path> outputFile;
-            try (var stream = Files.list(outputDir)) {
-                outputFile = stream.filter(Files::isRegularFile).findFirst();
+            File file;
+            if (pathParam != null && !pathParam.isEmpty()) {
+                file = outputDir.resolve(pathParam).toFile();
+                if (!file.exists() || !file.toPath().normalize().startsWith(outputDir.normalize())) {
+                    return ResponseEntity.notFound().build();
+                }
+            } else {
+                // Find first file in output dir
+                Optional<Path> outputFile;
+                try (var stream = Files.list(outputDir)) {
+                    outputFile = stream.filter(Files::isRegularFile).findFirst();
+                }
+
+                if (outputFile.isEmpty()) {
+                    return ResponseEntity.notFound().build();
+                }
+                file = outputFile.get().toFile();
             }
 
-            if (outputFile.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            File file = outputFile.get().toFile();
             FileSystemResource resource = new FileSystemResource(file);
 
             return ResponseEntity.ok()

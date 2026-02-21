@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function FileTree({ entries, onSelectionChange }) {
+function FileTree({ entries, onSelectionChange, onPreview }) {
     const [selected, setSelected] = useState(new Set())
     const [expanded, setExpanded] = useState(new Set())
 
@@ -71,12 +71,12 @@ function FileTree({ entries, onSelectionChange }) {
 
         return (
             <div key={path} style={{ paddingLeft: `${depth * 20}px` }}>
-                <div className="file-tree-item flex items-center gap-2 group">
+                <div className="file-tree-item flex items-center gap-2 group py-1 border-b border-transparent hover:border-fluid-border/50 transition-colors">
                     {/* Expand/Collapse for dirs */}
                     {isDir ? (
                         <button
                             onClick={() => toggleExpand(path)}
-                            className="w-5 h-5 flex items-center justify-center rounded transition-transform"
+                            className="w-5 h-5 flex flex-shrink-0 items-center justify-center rounded transition-transform"
                         >
                             <svg
                                 className={`w-3 h-3 text-fluid-muted transition-transform ${isExpanded ? 'rotate-90' : ''}`}
@@ -93,17 +93,17 @@ function FileTree({ entries, onSelectionChange }) {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleSelect(path)}
-                            className="w-4 h-4 rounded border-fluid-border text-brand-500 focus:ring-brand-300 cursor-pointer ml-0.5"
+                            className="w-4 h-4 rounded border-fluid-border text-brand-500 focus:ring-brand-300 cursor-pointer flex-shrink-0 ml-0.5"
                         />
                     )}
 
                     {/* Icon */}
                     {isDir ? (
-                        <svg className="w-4 h-4 text-fluid-accent" viewBox="0 0 24 24" fill="currentColor">
+                        <svg className="w-4 h-4 flex-shrink-0 text-fluid-accent" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z" />
                         </svg>
                     ) : (
-                        <svg className="w-4 h-4 text-fluid-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg className="w-4 h-4 flex-shrink-0 text-fluid-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <polyline points="14 2 14 8 20 8" />
                         </svg>
@@ -113,6 +113,20 @@ function FileTree({ entries, onSelectionChange }) {
                     <span className="text-sm text-fluid-text font-medium truncate">
                         {name}
                     </span>
+
+                    {/* Preview Button */}
+                    {!isDir && entry && onPreview && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onPreview(entry.path, name) }}
+                            className="ml-2 w-6 h-6 flex flex-shrink-0 items-center justify-center rounded-lg text-fluid-muted hover:text-fluid-accent hover:bg-fluid-accent/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            title="Preview file"
+                        >
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    )}
 
                     {/* Size */}
                     {!isDir && entry && (
