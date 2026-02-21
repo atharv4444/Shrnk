@@ -35,13 +35,13 @@ function FileCard({ name, size }) {
     }
 
     return (
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/70 backdrop-blur-sm hover:bg-white/70 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-surface-50 flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-fluid-card border border-fluid-border backdrop-blur-sm hover:brightness-95 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-surface-50 dark:bg-surface-800 flex items-center justify-center flex-shrink-0">
                 {getFileIcon(name)}
             </div>
             <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-surface-800 truncate">{name}</p>
-                {size && <p className="text-xs text-surface-300 font-mono">{formatSize(size)}</p>}
+                <p className="text-sm font-medium text-fluid-text truncate">{name}</p>
+                {size && <p className="text-xs text-fluid-muted font-mono">{formatSize(size)}</p>}
             </div>
         </div>
     )

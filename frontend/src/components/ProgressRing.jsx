@@ -42,11 +42,11 @@ function ProgressRing({ percent = 0, size = 120, strokeWidth = 8, eta, status, l
 
                 {/* Center Text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold text-surface-900 font-mono tabular-nums">
+                    <span className="text-2xl font-bold text-fluid-text font-mono tabular-nums">
                         {displayPercent}%
                     </span>
                     {status && (
-                        <span className="text-[10px] font-semibold text-brand-500 uppercase tracking-wider mt-0.5">
+                        <span className="text-[10px] font-semibold text-fluid-accent uppercase tracking-wider mt-0.5">
                             {status}
                         </span>
                     )}
@@ -56,12 +56,12 @@ function ProgressRing({ percent = 0, size = 120, strokeWidth = 8, eta, status, l
             {/* Label & ETA */}
             <div className="text-center">
                 {label && (
-                    <p className="text-sm text-surface-800 font-medium truncate max-w-[200px]">
+                    <p className="text-sm text-fluid-text font-medium truncate max-w-[200px]">
                         {label}
                     </p>
                 )}
                 {eta && (
-                    <p className="text-xs text-surface-300 font-mono mt-1">
+                    <p className="text-xs text-fluid-muted font-mono mt-1">
                         ETA: {eta}
                     </p>
                 )}

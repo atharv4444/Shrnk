@@ -79,7 +79,7 @@ function FileTree({ entries, onSelectionChange }) {
                             className="w-5 h-5 flex items-center justify-center rounded transition-transform"
                         >
                             <svg
-                                className={`w-3 h-3 text-surface-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                                className={`w-3 h-3 text-fluid-muted transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
@@ -93,30 +93,30 @@ function FileTree({ entries, onSelectionChange }) {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleSelect(path)}
-                            className="w-4 h-4 rounded border-surface-200 text-brand-500 focus:ring-brand-300 cursor-pointer ml-0.5"
+                            className="w-4 h-4 rounded border-fluid-border text-brand-500 focus:ring-brand-300 cursor-pointer ml-0.5"
                         />
                     )}
 
                     {/* Icon */}
                     {isDir ? (
-                        <svg className="w-4 h-4 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                        <svg className="w-4 h-4 text-fluid-accent" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z" />
                         </svg>
                     ) : (
-                        <svg className="w-4 h-4 text-surface-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg className="w-4 h-4 text-fluid-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <polyline points="14 2 14 8 20 8" />
                         </svg>
                     )}
 
                     {/* Name */}
-                    <span className="text-sm text-surface-800 font-medium truncate">
+                    <span className="text-sm text-fluid-text font-medium truncate">
                         {name}
                     </span>
 
                     {/* Size */}
                     {!isDir && entry && (
-                        <span className="text-xs text-surface-300 font-mono ml-auto">
+                        <span className="text-xs text-fluid-muted font-mono ml-auto">
                             {formatSize(entry.size)}
                         </span>
                     )}
@@ -139,22 +139,22 @@ function FileTree({ entries, onSelectionChange }) {
                 <button onClick={selectAll} className="text-xs font-semibold text-brand-500 hover:text-brand-600 transition-colors">
                     Select All
                 </button>
-                <span className="text-surface-200">|</span>
-                <button onClick={selectNone} className="text-xs font-semibold text-surface-300 hover:text-surface-800 transition-colors">
+                <span className="text-fluid-border">|</span>
+                <button onClick={selectNone} className="text-xs font-semibold text-fluid-muted hover:text-fluid-text transition-colors">
                     Select None
                 </button>
-                <span className="ml-auto text-xs font-mono text-surface-300">
+                <span className="ml-auto text-xs font-mono text-fluid-muted">
                     {selected.size} selected
                 </span>
             </div>
 
             {/* Tree */}
-            <div className="max-h-64 overflow-y-auto rounded-xl border border-surface-100 bg-white/50 p-2">
+            <div className="max-h-64 overflow-y-auto rounded-xl border border-fluid-border bg-fluid-card p-2">
                 {Object.entries(tree).map(([name, node]) =>
                     renderNode(name, node, name, 0)
                 )}
                 {(!entries || entries.length === 0) && (
-                    <p className="text-center text-sm text-surface-300 py-6">No files found</p>
+                    <p className="text-center text-sm text-fluid-muted py-6">No files found</p>
                 )}
             </div>
         </div>

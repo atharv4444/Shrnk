@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -17,7 +18,7 @@ export default {
           200: '#ddd6fe',
           300: '#c4b5fd',
           400: '#a78bfa',
-          500: '#8b5cf6',
+          500: 'var(--color-brand-accent)',
           600: '#7c3aed',
           700: '#6d28d9',
           800: '#5b21b6',
@@ -30,10 +31,15 @@ export default {
           300: '#d4d4d4',
           800: '#262626',
           900: '#171717',
+        },
+        fluid: {
+          bg: 'var(--color-bg)',
+          card: 'var(--color-card)',
+          text: 'var(--color-text)',
+          muted: 'var(--color-text-muted)',
+          border: 'var(--color-border)',
+          accent: 'var(--color-brand-accent)',
         }
-      },
-      backdropBlur: {
-        xs: '2px',
       },
       animation: {
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',

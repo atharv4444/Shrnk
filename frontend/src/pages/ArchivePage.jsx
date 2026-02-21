@@ -205,10 +205,10 @@ function ArchivePage() {
         <div className="animate-slide-up">
             {/* Page Title */}
             <div className="mb-8">
-                <h2 className="text-3xl font-extrabold text-surface-900 tracking-tight">
+                <h2 className="text-3xl font-extrabold text-fluid-text tracking-tight">
                     Archive Engine
                 </h2>
-                <p className="text-surface-300 mt-1 font-medium">
+                <p className="text-fluid-muted mt-1 font-medium">
                     Compress, extract, and explore ZIP archives with AES-256 encryption.
                 </p>
             </div>
@@ -224,8 +224,8 @@ function ArchivePage() {
                         key={tab.id}
                         onClick={() => { setMode(tab.id); resetAll() }}
                         className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${mode === tab.id
-                                ? 'bg-brand-500 text-white shadow-lg shadow-brand-200'
-                                : 'bg-white/60 text-surface-800 hover:bg-white/90 border border-white/80'
+                            ? 'bg-fluid-accent text-white shadow-lg shadow-brand-500/25'
+                            : 'bg-fluid-card text-fluid-text hover:brightness-110 border border-fluid-border'
                             }`}
                     >
                         <span className="mr-1.5">{tab.icon}</span>
@@ -269,7 +269,7 @@ function ArchivePage() {
                     {/* Peek Results */}
                     {peekEntries && (
                         <div className="glass-card-static p-6 animate-slide-up">
-                            <h3 className="text-sm font-bold text-surface-800 uppercase tracking-wider mb-4">
+                            <h3 className="text-sm font-bold text-fluid-text uppercase tracking-wider mb-4">
                                 📋 Archive Contents
                             </h3>
                             <FileTree entries={peekEntries} onSelectionChange={setSelectedPaths} />
@@ -288,8 +288,8 @@ function ArchivePage() {
                         <div className="glass-card-static p-6 animate-slide-up">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-lg font-bold text-surface-900">✅ Done!</h3>
-                                    <p className="text-sm text-surface-300 mt-1">
+                                    <h3 className="text-lg font-bold text-fluid-text">✅ Done!</h3>
+                                    <p className="text-sm text-fluid-muted mt-1">
                                         {result.fileName && `File: ${result.fileName}`}
                                         {result.totalFiles && ` • ${result.totalFiles} files`}
                                         {result.size && ` • ${(result.size / 1024 / 1024).toFixed(2)} MB`}

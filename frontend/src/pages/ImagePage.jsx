@@ -137,10 +137,10 @@ function ImagePage() {
         <div className="animate-slide-up">
             {/* Page Title */}
             <div className="mb-8">
-                <h2 className="text-3xl font-extrabold text-surface-900 tracking-tight">
+                <h2 className="text-3xl font-extrabold text-fluid-text tracking-tight">
                     Image Processor
                 </h2>
-                <p className="text-surface-300 mt-1 font-medium">
+                <p className="text-fluid-muted mt-1 font-medium">
                     Batch resize images and strip EXIF metadata — powered by parallel processing.
                 </p>
             </div>
@@ -161,7 +161,7 @@ function ImagePage() {
                     {/* Image Previews */}
                     {previews.length > 0 && !isProcessing && !result && (
                         <div className="glass-card-static p-6 animate-slide-up">
-                            <h3 className="text-sm font-bold text-surface-800 uppercase tracking-wider mb-4">
+                            <h3 className="text-sm font-bold text-fluid-text uppercase tracking-wider mb-4">
                                 🖼️ Preview
                             </h3>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -182,7 +182,7 @@ function ImagePage() {
                                 ))}
                             </div>
                             {files.length > 8 && (
-                                <p className="text-xs text-surface-300 text-center mt-3">
+                                <p className="text-xs text-fluid-muted text-center mt-3">
                                     + {files.length - 8} more images
                                 </p>
                             )}
@@ -213,8 +213,8 @@ function ImagePage() {
                         <div className="glass-card-static p-6 animate-slide-up">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-lg font-bold text-surface-900">✅ Images Processed!</h3>
-                                    <p className="text-sm text-surface-300 mt-1">
+                                    <h3 className="text-lg font-bold text-fluid-text">✅ Images Processed!</h3>
+                                    <p className="text-sm text-fluid-muted mt-1">
                                         {result.totalFiles} files processed
                                         {result.size && ` • Output: ${(result.size / 1024 / 1024).toFixed(2)} MB`}
                                     </p>
@@ -263,8 +263,8 @@ function ImagePage() {
                     )}
 
                     {/* Info Card */}
-                    <div className="glass-card-static p-5 text-xs text-surface-300 space-y-2">
-                        <p className="font-semibold text-surface-800 text-sm">How it works</p>
+                    <div className="glass-card-static p-5 text-xs text-fluid-muted space-y-2">
+                        <p className="font-semibold text-fluid-text text-sm">How it works</p>
                         <p>Images are processed using Java parallel streams for maximum throughput.</p>
                         <p>EXIF stripping removes GPS coordinates, camera model, and other private data.</p>
                         <p>Results are packaged as a ZIP for easy download.</p>
