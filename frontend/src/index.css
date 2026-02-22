@@ -58,6 +58,22 @@ body {
   display: block;
 }
 
+::view-transition-old(root) {
+  z-index: 2;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+html.dark::view-transition-old(root) {
+  z-index: 1;
+}
+
+html.dark::view-transition-new(root) {
+  z-index: 2;
+}
+
 /* ──────── Ambient Background ──────── */
 body::before {
   content: '';

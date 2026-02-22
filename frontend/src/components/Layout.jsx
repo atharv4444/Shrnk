@@ -74,6 +74,7 @@ function Layout({ children }) {
                     pseudoElement: newTheme
                         ? '::view-transition-new(root)'
                         : '::view-transition-old(root)',
+                    fill: 'forwards'
                 }
             )
         })
